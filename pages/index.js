@@ -29,6 +29,29 @@ function ProfileSidebar(props) {
   )
 }
 
+function ProfileRelationsBox(props) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        {props.title} ({props.items.length})
+      </h2>
+
+      <ul>
+          {/* {seguidores.map((itemAtual) => {
+            return (
+              <li key={itemAtual}>
+                < a href={`https://github.com/${itemAtual}.png`}>
+                  <img src={itemAtual.image} />
+                  <span>{itemAtual.title}</span>
+                </a>
+              </li>
+            )
+          })} */}
+        </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
   const [comunidades, setComunidades] = React.useState([{
     id: '123456789',
@@ -37,6 +60,20 @@ export default function Home() {
   }]);
   const githubUser = 'robsonshockwave';
   const pessoasFavoritas = ['juunegreiros', 'omariosouto', 'peas', 'rafaballerini', 'marcobrunodev', 'felipefialho'];
+
+  // 0 - Pegar o array de dados do github
+  const [seguidores, setSeguidores] = React.useState([]);
+  React.useEffect(function() {
+    fetch('https://api.github.com/users/robsonshockwave/followers')
+      .then(function (respostaDoServidor) {
+        return respostaDoServidor.json();
+      })
+      .then(function (respostaCompleta) {
+        setSeguidores(respostaCompleta);
+      })
+  }, []);
+
+  // 1 - Criar um box que vai ter um map,baseado nos items do array que pegamos do GitHyb
 
   return (
     <>
@@ -65,7 +102,6 @@ export default function Home() {
               image: dadosDoForm.get('image')
             }
             setComunidades([...comunidades, comunidade]);
-            console.log(comunidades);
           }}>
             <div>
                 <input 
@@ -87,6 +123,7 @@ export default function Home() {
         </Box>
       </div>
       <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+        <ProfileRelationsBox title="Seguidores" items={seguidores}/>
         <ProfileRelationsBoxWrapper>
           <h2 className="smallTitle">
             Comunidades ({comunidades.length})
@@ -96,7 +133,7 @@ export default function Home() {
               {comunidades.map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
-                    < a href={`/users/${itemAtual.title}`} key={itemAtual.title}>
+                    < a href={`/users/${itemAtual.title}`}>
                       { /* <img src={`http://placehold.it/300x300`} /> */}
                       <img src={itemAtual.image} />
                       <span>{itemAtual.title}</span>
