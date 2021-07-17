@@ -53,16 +53,13 @@ function ProfileRelationsBox(props) {
 }
 
 export default function Home() {
-  const [comunidades, setComunidades] = React.useState([{
-    id: '123456789',
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }]);
+  const [comunidades, setComunidades] = React.useState([]);
   const githubUser = 'robsonshockwave';
   const pessoasFavoritas = ['juunegreiros', 'omariosouto', 'peas', 'rafaballerini', 'marcobrunodev', 'felipefialho'];
 
   // 0 - Pegar o array de dados do github
   const [seguidores, setSeguidores] = React.useState([]);
+  // GET
   React.useEffect(function() {
     fetch('https://api.github.com/users/robsonshockwave/followers')
       .then(function (respostaDoServidor) {
@@ -70,6 +67,30 @@ export default function Home() {
       })
       .then(function (respostaCompleta) {
         setSeguidores(respostaCompleta);
+      })
+
+      // API GraphQL
+      fetch('https://graphql.datocms.com/', {
+        method: 'POST',
+        headers: {
+          'Authorization': '2774ad09da03695db6835ecb99c364',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ "query": `query {
+          allCommunities {
+            id
+            title
+            imageUrl
+            creatorSlug
+          }
+        }` })
+      })
+      .then((response) => response.json())
+      .then((respostaCompleta) => {
+        const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+
+        setComunidades(comunidadesVindasDoDato)
       })
   }, []);
 
@@ -130,18 +151,18 @@ export default function Home() {
           </h2>
 
           <ul>
-              {comunidades.map((itemAtual) => {
-                return (
-                  <li key={itemAtual.id}>
-                    < a href={`/users/${itemAtual.title}`}>
-                      { /* <img src={`http://placehold.it/300x300`} /> */}
-                      <img src={itemAtual.image} />
-                      <span>{itemAtual.title}</span>
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
+            {comunidades.map((itemAtual) => {
+              return (
+                <li key={itemAtual.id}>
+                  < a href={`/comunities/${itemAtual.id}`}>
+                    { /* <img src={`http://placehold.it/300x300`} /> */}
+                    <img src={itemAtual.imageUrl} />
+                    <span>{itemAtual.title}</span>
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
         </ProfileRelationsBoxWrapper>
         <ProfileRelationsBoxWrapper>
           <h2 className="smallTitle">
