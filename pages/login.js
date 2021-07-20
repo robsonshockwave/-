@@ -1,9 +1,11 @@
 import React from 'react';
 // Hook do NextJS
 import { useRouter } from 'next/router'
+import nookies from 'nookies';
 
 export default function LoginScreen() {
     const router = useRouter();
+    const [githubUser, setGithubUser] = React.useState('');
 
     return (
         <main style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -20,12 +22,34 @@ export default function LoginScreen() {
             <form className="box" onSubmit={(infosDoEvento) => {
                     infosDoEvento.preventDefault();
                     // alert('alguem clicou aqui')
-                    router.push('/', {})
+                    fetch('https://alurakut.vercel.app/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ githubUser: 'robsonshockwave' })
+                        .then(async (respostaDoServer) => {
+                            const dadosDaResposta = await respostaDoServer.json();
+                            const token = dadosDaResposta.token;
+                            nookies.set(null, 'USER_TOKEN', token, {
+                                path: '/',
+                                maxAge: 86400 * 7
+                            })
+                            router.push('/');
+                        })
+                    })
                 }}>
                 <p>
                 Acesse agora mesmo com seu usuário do <strong>GitHub</strong>!
             </p>
-                <input placeholder="Usuário" />
+                <input 
+                    placeholder="Usuário" 
+                    value={githubUser} 
+                    onChange={(evento) => {
+                        setGithubUser(evento.target.value)
+                    }}
+                />
+                {githubUser.length === 0 ? 'Preencha o campo' : ''}
                 <button type="submit">
                     Login
                 </button>
